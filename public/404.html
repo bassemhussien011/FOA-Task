@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Redirecting…</title>
+  <script>
+    const segments = window.location.pathname.split('/').filter(Boolean);
+    const repository = segments.shift();
+    const route = `/${segments.join('/')}`;
+    const params = new URLSearchParams({
+      route,
+      search: window.location.search,
+      hash: window.location.hash
+    });
+    window.location.replace(`/${repository}/?${params.toString()}`);
+  </script>
+</head>
+<body></body>
+</html>

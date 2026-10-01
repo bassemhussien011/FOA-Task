@@ -6,6 +6,15 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const route = params.get('route');
+    if (route) {
+      const search = params.get('search') || '';
+      const hash = params.get('hash') || '';
+      window.history.replaceState(null, '', window.location.pathname + route + search + hash);
+    }
+  </script>
 </head>
 <body>
   <app-root></app-root>

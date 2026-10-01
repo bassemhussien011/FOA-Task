@@ -1,14 +1,10 @@
-# FOATask
-
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.3.
-
 # Mise Kitchen Orders
 
-A responsive kitchen order board built with Angular 21 standalone components and a local `json-server` API.
+Responsive kitchen order board built with Angular 21, standalone components, strict TypeScript, and `json-server`.
 
-## Run locally
+## Run
 
-Requirements: Node.js 20.19+ and npm.
+Requires Node.js 20.19+ and npm.
 
 ```bash
 npm install
@@ -21,39 +17,34 @@ In a second terminal:
 npm start
 ```
 
-Open `http://localhost:4200/orders`. The API is available at `http://localhost:3000`.
+Open `http://localhost:4200/orders`. The API runs at `http://localhost:3000`.
+
+## GitHub Pages demo
+
+The Pages build uses a browser-based mock API seeded from `db.json`; changes persist in that browser's local storage. Local development continues to use `json-server`.
+
+Push to `main` or `master` to deploy with GitHub Actions. In the repository settings, enable **Pages → GitHub Actions**. The app will be available at `https://<owner>.github.io/<repository>/`.
 
 ## Features
 
-- Four status columns with live elapsed timers, late-order highlighting, order subtotals, and optimistic status changes with rollback.
-- Search by order or table, plus type filters persisted in query parameters. Search is debounced.
-- Lazy-loaded order detail and new-order routes, menu lookup, and service/VAT breakdown.
-- Reactive order form with dynamic lines, quantity/table/mobile validation, a live tax-inclusive total, and guarded submission.
-- Board refreshes every 15 seconds without overlapping requests or clearing existing cards; polling and timer subscriptions stop with the board.
-- Responsive layout, keyboard-visible focus, and loading, empty, and error states.
+- Four order-status columns, elapsed timers, late indicators, subtotals, and optimistic status updates with rollback.
+- Debounced search and type filters synchronized with URL query parameters.
+- Lazy-loaded order details and creation form.
+- Reactive item form with quantity, table, and Egyptian mobile validation; live price total.
+- Subtotal, dine-in service (12%), and VAT (14%) calculations.
+- Non-overlapping 15-second polling that pauses when the browser tab is hidden.
+- Arabic/English runtime translations through Transloco, with saved language choice and RTL/LTR layout.
+- Responsive layout and loading, empty, and error states.
 
-## Decisions
+## Implementation notes
 
-- Signals hold component state and derived form totals; RxJS handles HTTP, debounce, and polling. `exhaustMap` prevents overlapping board refreshes, while `takeUntilDestroyed` owns subscriptions.
-- API calls live in `OrdersApi`; price math and shared domain types live in `core`.
-- Search and type are client-side filters over the board response, then mirrored into URL query parameters for shareable views.
-- Order totals use menu prices, 12% service for dine-in only, and 14% VAT on subtotal plus service. The new-order total includes the same applicable taxes.
-- `json-server` supplies IDs for newly posted orders. The next order number is determined from the existing orders immediately before submission.
-- No Arabic/English toggle, visibility-based polling pause, deployment, or end-to-end test was added; those were optional or outside the local mock API scope.
+- Signals manage UI state; RxJS handles HTTP, debouncing, and polling.
+- Order/menu API calls are in `OrdersApi`; shared models, pricing, and validators are in `src/app/core/`.
+- Search and filtering run client-side. Order numbers use the highest existing number plus one; this is not atomic for concurrent users.
+- Order data is stored in the root `db.json` by json-server.
 
-## Checks
+## Checks and follow-up
 
-```bash
-npm test
-npm run build
-```
+`npm run build` succeeds, with CSS-size warnings for the board and order form. Automated test files are not included. Concurrent-safe order numbering is not implemented.
 
-## API seed data
-
-The root `db.json` contains the supplied menu and seed orders. Start it with `npm run api` or directly with:
-
-```bash
-npx json-server@1.0.0-beta.3 db.json --port 3000
-```
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The mock API persists changes to `db.json`; restore the seed from version control when a clean dataset is needed.
