@@ -19,3 +19,17 @@ body { min-width: 320px; min-height: 100vh; margin: 0; color: var(--ink); backgr
 button, input, select { font: inherit; }
 button, a, select { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid #486b4b; outline-offset: 3px; }
+
+[dir='rtl'] body { font-family: Tahoma, Arial, sans-serif; }
+[dir='rtl'] .order-card { border-left: 1px solid #e0e2d8; border-right: 3px solid #dba74f; }
+[dir='rtl'] .column-preparing .order-card { border-right-color: #6a9da0; }
+[dir='rtl'] .column-ready .order-card { border-right-color: #85a94b; }
+[dir='rtl'] .column-served .order-card { border-right-color: #8b9188; }
+[dir='rtl'] .order-card.late { border-right-color: #cd654b; }
+[dir='rtl'] .text-input { text-align: right; }
+[dir='rtl'] input[type='number'], [dir='rtl'] input[inputmode='tel'] { direction: ltr; text-align: left; }
+[dir='rtl'] .row-total { text-align: left; }
+[dir='rtl'] .filter-control { flex-direction: row-reverse; }
+@media (max-width: 520px) {
+  [dir='rtl'] .app-footer { flex-direction: row-reverse; }
+}

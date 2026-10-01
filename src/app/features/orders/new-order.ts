@@ -6,6 +6,7 @@ import { catchError, of, switchMap } from 'rxjs';
 import { atLeastOneOrderLineValidator, egyptianMobileValidator, integerValidator } from '../../core/order.validators';
 import { calculatePrice, formatEgp, MenuItem, OrderDraft, OrderType } from '../../core/order.models';
 import { OrdersApi } from '../../core/orders-api.service';
+import { LanguageService } from '../../core/language.service';
 
 type LineControls = { menuId: FormControl<string>; qty: FormControl<number>; note: FormControl<string> };
 type LineGroup = FormGroup<LineControls>;
@@ -20,6 +21,7 @@ type OrderControls = { type: FormControl<OrderType>; table: FormControl<number |
 })
 export class NewOrder {
   private readonly api = inject(OrdersApi);
+  readonly language = inject(LanguageService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   readonly menu = signal<MenuItem[]>([]);
@@ -105,7 +107,7 @@ export class NewOrder {
         };
         return this.api.createOrder(draft);
       }),
-      catchError(() => { this.submitError.set('The order could not be saved. Please try again.'); this.saving.set(false); return of(null); }),
+      catchError(() => { this.submitError.set('saveError'); this.saving.set(false); return of(null); }),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((created) => {
       if (!created) return;

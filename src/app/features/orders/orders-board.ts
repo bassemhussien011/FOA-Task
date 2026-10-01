@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { catchError, debounceTime, distinctUntilChanged, EMPTY, exhaustMap, interval, Subject, tap, timer } from 'rxjs';
-import { formatEgp, MenuItem, ORDER_STATUSES, Order, OrderStatus, OrderType } from '../../core/order.models';
+import { catchError, debounceTime, distinctUntilChanged, EMPTY, exhaustMap, finalize, fromEvent, interval, startWith, Subject, switchMap, tap, timer } from 'rxjs';
+import { MenuItem, ORDER_STATUSES, Order, OrderStatus, OrderType } from '../../core/order.models';
 import { OrdersApi } from '../../core/orders-api.service';
+import { LanguageService } from '../../core/language.service';
 
 type OrderTypeFilter = OrderType | 'all';
 
@@ -24,13 +26,16 @@ function isOrderType(value: string | null): value is OrderType {
 })
 export class OrdersBoard {
   private readonly api = inject(OrdersApi);
+  readonly language = inject(LanguageService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   private readonly searchChanges = new Subject<string>();
   readonly statuses = ORDER_STATUSES;
   readonly orders = signal<Order[]>([]);
   readonly menu = signal<MenuItem[]>([]);
+  private readonly pendingStatuses = signal(new Map<string, OrderStatus>());
   readonly search = signal('');
   readonly searchDraft = signal('');
   readonly typeFilter = signal<OrderTypeFilter>('all');
@@ -54,20 +59,28 @@ export class OrdersBoard {
       }),
       takeUntilDestroyed(),
     ).subscribe();
-    timer(0, 15_000).pipe(
-      exhaustMap(() => this.api.loadBoard().pipe(
-        tap(({ orders, menu }) => {
-          this.orders.set(orders);
-          this.menu.set(menu);
-          this.loading.set(false);
-          this.error.set('');
-        }),
-        catchError(() => {
-          this.loading.set(false);
-          this.error.set('Could not refresh orders. Check that the mock API is running, then try again.');
-          return EMPTY;
-        }),
-      )),
+    fromEvent(this.document, 'visibilitychange').pipe(
+      startWith(null),
+      switchMap(() => this.document.visibilityState === 'hidden'
+        ? EMPTY
+        : timer(0, 15_000).pipe(
+          exhaustMap(() => this.api.loadBoard().pipe(
+            tap(({ orders, menu }) => {
+              this.orders.set(orders.map((order) => {
+                const pendingStatus = this.pendingStatuses().get(order.id);
+                return pendingStatus ? { ...order, status: pendingStatus } : order;
+              }));
+              this.menu.set(menu);
+              this.loading.set(false);
+              this.error.set('');
+            }),
+            catchError(() => {
+              this.loading.set(false);
+              this.error.set('refreshError');
+              return EMPTY;
+            }),
+          )),
+        )),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe();
     interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.now.set(Date.now()));
@@ -96,7 +109,7 @@ export class OrdersBoard {
 
   subtotal(order: Order): string {
     const amount = order.items.reduce((total, line) => total + (this.menu().find((item) => item.id === line.menuId)?.price ?? 0) * line.qty, 0);
-    return formatEgp(amount);
+    return this.language.formatCurrency(amount);
   }
 
   elapsed(createdAt: string): string {
@@ -120,18 +133,38 @@ export class OrdersBoard {
 
   advance(order: Order): void {
     const next = NEXT_STATUS[order.status];
-    if (!next) return;
-    const previousOrders = this.orders();
-    this.orders.set(previousOrders.map((entry) => entry.id === order.id ? { ...entry, status: next } : entry));
-    this.api.updateStatus(order.id, next).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    if (!next || this.pendingStatuses().has(order.id)) return;
+    this.pendingStatuses.update((pending) => new Map(pending).set(order.id, next));
+    this.orders.update((orders) => orders.map((entry) => entry.id === order.id ? { ...entry, status: next } : entry));
+    this.api.updateStatus(order.id, next).pipe(
+      tap((updated) => {
+        this.orders.update((orders) => orders.map((entry) => entry.id === order.id ? { ...entry, status: updated.status } : entry));
+      }),
+      finalize(() => {
+        this.pendingStatuses.update((pending) => {
+          const remaining = new Map(pending);
+          remaining.delete(order.id);
+          return remaining;
+        });
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       error: () => {
-        this.orders.set(previousOrders);
+        this.orders.update((orders) => orders.map((entry) => entry.id === order.id ? { ...entry, status: order.status } : entry));
         this.error.set(`Order #${order.number} was not moved. The change has been rolled back.`);
       },
     });
   }
 
+  isPending(orderId: string): boolean {
+    return this.pendingStatuses().has(orderId);
+  }
+
   typeLabel(type: OrderType): string {
-    return type === 'dine-in' ? 'Dine in' : type === 'takeaway' ? 'Takeaway' : 'Delivery';
+    return this.language.typeLabel(type);
+  }
+
+  statusLabel(status: OrderStatus): string {
+    return this.language.statusLabel(status);
   }
 }

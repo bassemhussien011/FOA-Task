@@ -7,6 +7,9 @@
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #c6e46c; box-shadow: 0 0 0 3px #c6e46c22; }
 .meta-divider { color: #66756d; }
 .new-order-link { color: #172622; background: #c6e46c; padding: 10px 15px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 9px; }
+.language-button { min-height: 38px; padding: 0 11px; border: 1px solid #66766d; border-radius: 4px; background: transparent; color: #f8f5eb; font-size: 12px; cursor: pointer; }
+.language-button:hover { background: #263832; }
 .new-order-link span { font-size: 17px; vertical-align: -1px; padding-right: 4px; }
 main { min-height: calc(100vh - 116px); }
 .app-footer { display: flex; align-items: center; justify-content: space-between; padding: 15px clamp(18px, 4vw, 62px); border-top: 1px solid #dedfd5; color: #77837a; font-size: 10px; letter-spacing: .6px; }

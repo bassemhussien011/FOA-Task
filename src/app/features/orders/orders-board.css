@@ -39,6 +39,7 @@ h1 { margin: 0; color: #1c2e27; font: 600 36px/1 Georgia, serif; letter-spacing:
 .card-bottom span:last-child { color: #304239; font-weight: 700; font-variant-numeric: tabular-nums; }
 .advance-button { align-self: center; width: 33px; height: 35px; flex: 0 0 33px; margin-right: 8px; border: 1px solid #e1e5db; border-radius: 4px; color: #52734a; background: #f7f8f1; font-size: 19px; cursor: pointer; }
 .advance-button:hover { color: #fff; background: #35543e; border-color: #35543e; }.advance-button:focus-visible { outline: 2px solid #35543e; outline-offset: 2px; }
+.advance-button:disabled { opacity: .55; cursor: wait; }
 .column-empty { padding: 16px 7px; color: #8a9289; font: italic 13px Georgia, serif; }
 .screen-state { min-height: 310px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6a786d; text-align: center; }
 .screen-state h2 { margin: 12px 0 5px; color: #2b4034; font: 500 21px Georgia, serif; }.screen-state p { margin: 0; font-size: 13px; }

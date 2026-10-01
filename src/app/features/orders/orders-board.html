@@ -1,31 +1,31 @@
 <section class="board-page">
   <div class="page-heading">
-    <div><p class="eyebrow">WEDNESDAY · SERVICE IN PROGRESS</p><h1>Order board<span class="heading-dot">.</span></h1></div>
-    <div class="refresh-status"><span class="live-dot"></span> Live <span class="refresh-divider">·</span> refreshes every 15 sec</div>
+    <div><p class="eyebrow">{{ language.text('boardEyebrow') }}</p><h1>{{ language.text('boardTitle') }}<span class="heading-dot">.</span></h1></div>
+    <div class="refresh-status"><span class="live-dot"></span> {{ language.text('live') }} <span class="refresh-divider">·</span> {{ language.text('refreshInfo') }}</div>
   </div>
   <div class="toolbar">
-    <label class="search-box"><span aria-hidden="true">⌕</span><input aria-label="Search by order or table" [value]="search()" (input)="setSearch($any($event.target).value)" placeholder="Find order or table" /></label>
-    <label class="filter-control"><span>TYPE</span><select aria-label="Filter by order type" [value]="typeFilter()" (change)="setType($any($event.target).value)"><option value="all">All orders</option><option value="dine-in">Dine in</option><option value="takeaway">Takeaway</option><option value="delivery">Delivery</option></select></label>
+    <label class="search-box"><span aria-hidden="true">⌕</span><input [attr.aria-label]="language.text('searchLabel')" [value]="search()" (input)="setSearch($any($event.target).value)" [placeholder]="language.text('searchPlaceholder')" /></label>
+    <label class="filter-control"><span>{{ language.text('typeFilter') }}</span><select [attr.aria-label]="language.text('typeFilter')" [value]="typeFilter()" (change)="setType($any($event.target).value)"><option value="all">{{ language.text('allOrders') }}</option><option value="dine-in">{{ language.text('dineIn') }}</option><option value="takeaway">{{ language.text('takeaway') }}</option><option value="delivery">{{ language.text('delivery') }}</option></select></label>
   </div>
-  @if (error()) { <div class="error-banner" role="alert"><span>{{ error() }}</span><button type="button" (click)="error.set('')" aria-label="Dismiss error">×</button></div> }
-  @if (loading()) { <div class="screen-state" aria-live="polite"><span class="loader"></span><p>Connecting to the kitchen…</p></div> }
-  @else if (visibleOrderCount() === 0 && !error()) { <div class="screen-state"><span class="empty-mark">—</span><h2>{{ orders().length === 0 ? 'No orders yet' : 'No matching orders' }}</h2><p>{{ orders().length === 0 ? 'New orders will show up here as soon as they arrive.' : 'Try changing your search or order type filter.' }}</p></div> }
+  @if (error()) { <div class="error-banner" role="alert"><span>{{ language.text(error()) }}</span><button type="button" (click)="error.set('')" [attr.aria-label]="language.text('dismissError')">×</button></div> }
+  @if (loading()) { <div class="screen-state" aria-live="polite"><span class="loader"></span><p>{{ language.text('loadingKitchen') }}</p></div> }
+  @else if (visibleOrderCount() === 0 && !error()) { <div class="screen-state"><span class="empty-mark">—</span><h2>{{ language.text(orders().length === 0 ? 'noOrders' : 'noMatches') }}</h2><p>{{ language.text(orders().length === 0 ? 'noOrdersHint' : 'noMatchesHint') }}</p></div> }
   @else {
     <div class="board" aria-label="Orders by status">
       @for (status of statuses; track status) {
         <section class="column" [class]="'column column-' + status" [attr.aria-label]="status + ' orders'">
-          <header class="column-heading"><div><span class="status-marker"></span><h2>{{ status }}</h2></div><span class="count">{{ count(status) }}</span></header>
+          <header class="column-heading"><div><span class="status-marker"></span><h2>{{ statusLabel(status) }}</h2></div><span class="count">{{ count(status) }}</span></header>
           <div class="order-list">
             @for (order of visibleOrders(status); track order.id) {
               <article class="order-card" [class.late]="isLate(order)">
                 <a class="card-main" [routerLink]="['/orders', order.id]">
-                  <div class="card-top"><span class="order-number">#{{ order.number }}</span><span class="order-time" [class.late-time]="isLate(order)">{{ elapsed(order.createdAt) }}@if (isLate(order)) { <b>· late</b> }</span></div>
-                  <div class="order-context"><span>{{ order.table ? 'Table ' + order.table : typeLabel(order.type) }}</span><span class="type-tag">{{ typeLabel(order.type) }}</span></div>
-                  <div class="card-bottom"><span>{{ itemCount(order) }} {{ itemCount(order) === 1 ? 'item' : 'items' }}</span><span>EGP {{ subtotal(order) }}</span></div>
+                  <div class="card-top"><span class="order-number">#{{ order.number }}</span><span class="order-time" [class.late-time]="isLate(order)">{{ elapsed(order.createdAt) }}@if (isLate(order)) { <b>· {{ language.text('late') }}</b> }</span></div>
+                  <div class="order-context"><span>{{ order.table ? language.text('table') + ' ' + order.table : typeLabel(order.type) }}</span><span class="type-tag">{{ typeLabel(order.type) }}</span></div>
+                  <div class="card-bottom"><span>{{ itemCount(order) }} {{ language.text(itemCount(order) === 1 ? 'lineItem' : 'lineItems') }}</span><span>{{ language.language() === 'ar' ? 'ج.م' : 'EGP' }} {{ subtotal(order) }}</span></div>
                 </a>
-                @if (status !== 'served') { <button type="button" class="advance-button" (click)="advance(order)" [attr.aria-label]="'Move order ' + order.number + ' to next status'" [title]="'Move to ' + (status === 'new' ? 'preparing' : status === 'preparing' ? 'ready' : 'served')">→</button> }
+                @if (status !== 'served') { <button type="button" class="advance-button" (click)="advance(order)" [disabled]="isPending(order.id)" [attr.aria-label]="language.text('moveOrder')" [title]="isPending(order.id) ? language.text('updatingOrder') : language.text('moveOrder')">→</button> }
               </article>
-            } @empty { <div class="column-empty">Nothing here right now</div> }
+            } @empty { <div class="column-empty">{{ language.text('nothingHere') }}</div> }
           </div>
         </section>
       }

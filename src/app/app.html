@@ -1,7 +1,10 @@
 <header class="topbar">
-  <a class="brand" routerLink="/orders" aria-label="Mise home"><span class="brand-mark" aria-hidden="true">M</span><span>mise<span class="brand-period">.</span></span></a>
-  <div class="topbar-meta"><span class="live-dot"></span> KITCHEN DISPLAY <span class="meta-divider">/</span> CAIRO</div>
-  <a class="new-order-link" routerLink="/orders/new"><span aria-hidden="true">+</span> New order</a>
+  <a class="brand" routerLink="/orders" [attr.aria-label]="language.text('homeLabel')"><span class="brand-mark" aria-hidden="true">M</span><span>mise<span class="brand-period">.</span></span></a>
+  <div class="topbar-meta"><span class="live-dot"></span> {{ language.text('kitchenDisplay') }} <span class="meta-divider">/</span> {{ language.text('cairo') }}</div>
+  <div class="topbar-actions">
+    <button class="language-button" type="button" (click)="language.toggle()" [disabled]="language.loading()" [attr.aria-label]="language.text('switchLanguage')">{{ language.text('switchLanguage') }}</button>
+    <a class="new-order-link" routerLink="/orders/new"><span aria-hidden="true">+</span> {{ language.text('newOrder') }}</a>
+  </div>
 </header>
 <main><router-outlet /></main>
-<footer class="app-footer"><span>MISE KITCHEN SYSTEMS</span><span>Service with a little more care.</span></footer>
+<footer class="app-footer"><span>{{ language.text('footerBrand') }}</span><span>{{ language.text('footerMessage') }}</span></footer>

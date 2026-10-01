@@ -1,18 +1,18 @@
 <section class="detail-page">
-  <a class="back-link" routerLink="/orders">← <span>Back to order board</span></a>
-  @if (loading()) { <div class="detail-state" aria-live="polite"><span class="loader"></span><p>Loading order…</p></div> }
-  @else if (error()) { <div class="detail-state"><span class="state-mark">!</span><h1>Order unavailable</h1><p>{{ error() }}</p><a class="primary-link" routerLink="/orders">Return to board</a></div> }
+  <a class="back-link" routerLink="/orders">← <span>{{ language.text('backToBoard') }}</span></a>
+  @if (loading()) { <div class="detail-state" aria-live="polite"><span class="loader"></span><p>{{ language.text('loadingOrder') }}</p></div> }
+  @else if (error()) { <div class="detail-state"><span class="state-mark">!</span><h1>{{ language.text('unavailable') }}</h1><p>{{ language.text(error()) }}</p><a class="primary-link" routerLink="/orders">{{ language.text('returnToBoard') }}</a></div> }
   @else if (order(); as current) {
-    <header class="detail-heading"><div><p class="eyebrow">ORDER DETAILS · {{ current.status }}</p><h1>Order #{{ current.number }}<span>.</span></h1></div><div class="order-kind">{{ typeLabel(current.type) }}@if (current.table) { <span>· Table {{ current.table }}</span> }</div></header>
+    <header class="detail-heading"><div><p class="eyebrow">{{ language.text('orderDetails') }} · {{ language.statusLabel(current.status) }}</p><h1>{{ language.text('orderNumberLabel') }} #{{ current.number }}<span>.</span></h1></div><div class="order-kind">{{ typeLabel(current.type) }}@if (current.table) { <span>· {{ language.text('table') }} {{ current.table }}</span> }</div></header>
     <div class="detail-layout">
-      <section class="items-panel" aria-labelledby="items-title"><div class="section-title"><h2 id="items-title">Items</h2><span>{{ current.items.length }} lines</span></div>
+      <section class="items-panel" aria-labelledby="items-title"><div class="section-title"><h2 id="items-title">{{ language.text('items') }}</h2><span>{{ current.items.length }} {{ language.text('lines') }}</span></div>
         @for (line of current.items; track $index) {
-          <article class="line-item"><div class="line-copy"><h3>{{ menuItem(line.menuId)?.name ?? 'Unknown menu item' }}</h3><p>Qty {{ line.qty }}@if (line.note) { <span> · {{ line.note }}</span> }</p></div><strong>EGP {{ formatEgp((menuItem(line.menuId)?.price ?? 0) * line.qty) }}</strong></article>
+          <article class="line-item"><div class="line-copy"><h3>{{ language.menuName(line.menuId, menuItem(line.menuId)?.name ?? language.text('unknownItem')) }}</h3><p>{{ language.text('quantity') }} {{ line.qty }}@if (line.note) { <span> · {{ line.note }}</span> }</p></div><strong>{{ language.language() === 'ar' ? 'ج.م' : 'EGP' }} {{ language.formatCurrency((menuItem(line.menuId)?.price ?? 0) * line.qty) }}</strong></article>
         }
-        <div class="created-at">Placed <time [attr.datetime]="current.createdAt">{{ current.createdAt | date:'medium' }}</time></div>
+        <div class="created-at">{{ language.text('placed') }} <time [attr.datetime]="current.createdAt">{{ current.createdAt | date:'medium':undefined:language.dateLocale() }}</time></div>
       </section>
       @if (prices(); as breakdown) {
-        <aside class="price-panel" aria-label="Price breakdown"><p class="eyebrow">PAYMENT SUMMARY</p><h2>Price breakdown</h2><div class="price-row"><span>Subtotal</span><span>EGP {{ formatEgp(breakdown.subtotal) }}</span></div><div class="price-row"><span>Service · 12%@if (current.type !== 'dine-in') { <small>(dine-in only)</small> }</span><span>EGP {{ formatEgp(breakdown.service) }}</span></div><div class="price-row"><span>VAT · 14%</span><span>EGP {{ formatEgp(breakdown.vat) }}</span></div><div class="price-total"><span>Total</span><strong>EGP {{ formatEgp(breakdown.total) }}</strong></div></aside>
+        <aside class="price-panel" [attr.aria-label]="language.text('priceBreakdown')"><p class="eyebrow">{{ language.text('paymentSummary') }}</p><h2>{{ language.text('priceBreakdown') }}</h2><div class="price-row"><span>{{ language.text('subtotal') }}</span><span>{{ language.language() === 'ar' ? 'ج.م' : 'EGP' }} {{ language.formatCurrency(breakdown.subtotal) }}</span></div><div class="price-row"><span>{{ language.text('service') }} · 12%@if (current.type !== 'dine-in') { <small>{{ language.text('dineInOnly') }}</small> }</span><span>{{ language.language() === 'ar' ? 'ج.م' : 'EGP' }} {{ language.formatCurrency(breakdown.service) }}</span></div><div class="price-row"><span>{{ language.text('vat') }} · 14%</span><span>{{ language.language() === 'ar' ? 'ج.م' : 'EGP' }} {{ language.formatCurrency(breakdown.vat) }}</span></div><div class="price-total"><span>{{ language.text('total') }}</span><strong>{{ language.language() === 'ar' ? 'ج.م' : 'EGP' }} {{ language.formatCurrency(breakdown.total) }}</strong></div></aside>
       }
     </div>
   }
