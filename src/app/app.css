@@ -1,0 +1,14 @@
+ :host { display: block; min-height: 100vh; }
+.topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(18px, 4vw, 62px); background: #172622; color: #f8f5eb; }
+.brand { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font: 700 24px/1 Georgia, serif; letter-spacing: 0; }
+.brand-mark { width: 30px; height: 30px; display: grid; place-items: center; background: #c6e46c; color: #172622; border-radius: 50%; font: 700 16px/1 Georgia, serif; }
+.brand-period { color: #c6e46c; }
+.topbar-meta { color: #b0bbb2; font-size: 10px; letter-spacing: 1.2px; display: flex; gap: 10px; align-items: center; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #c6e46c; box-shadow: 0 0 0 3px #c6e46c22; }
+.meta-divider { color: #66756d; }
+.new-order-link { color: #172622; background: #c6e46c; padding: 10px 15px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: 700; }
+.new-order-link span { font-size: 17px; vertical-align: -1px; padding-right: 4px; }
+main { min-height: calc(100vh - 116px); }
+.app-footer { display: flex; align-items: center; justify-content: space-between; padding: 15px clamp(18px, 4vw, 62px); border-top: 1px solid #dedfd5; color: #77837a; font-size: 10px; letter-spacing: .6px; }
+.app-footer span:last-child { font-family: Georgia, serif; font-style: italic; letter-spacing: 0; font-size: 12px; }
+@media (max-width: 520px) { .topbar { height: 60px; } .topbar-meta { font-size: 0; gap: 0; } .meta-divider { display: none; } .app-footer { gap: 12px; font-size: 8px; } }
