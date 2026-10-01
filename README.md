@@ -2,58 +2,58 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.3.
 
-## Development server
+# Mise Kitchen Orders
 
-To start a local development server, run:
+A responsive kitchen order board built with Angular 21 standalone components and a local `json-server` API.
 
-```bash
-ng serve
-```
+## Run locally
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Requirements: Node.js 20.19+ and npm.
 
 ```bash
-ng generate component component-name
+npm install
+npm run api
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+In a second terminal:
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+Open `http://localhost:4200/orders`. The API is available at `http://localhost:3000`.
 
-To build the project run:
+## Features
+
+- Four status columns with live elapsed timers, late-order highlighting, order subtotals, and optimistic status changes with rollback.
+- Search by order or table, plus type filters persisted in query parameters. Search is debounced.
+- Lazy-loaded order detail and new-order routes, menu lookup, and service/VAT breakdown.
+- Reactive order form with dynamic lines, quantity/table/mobile validation, a live tax-inclusive total, and guarded submission.
+- Board refreshes every 15 seconds without overlapping requests or clearing existing cards; polling and timer subscriptions stop with the board.
+- Responsive layout, keyboard-visible focus, and loading, empty, and error states.
+
+## Decisions
+
+- Signals hold component state and derived form totals; RxJS handles HTTP, debounce, and polling. `exhaustMap` prevents overlapping board refreshes, while `takeUntilDestroyed` owns subscriptions.
+- API calls live in `OrdersApi`; price math and shared domain types live in `core`.
+- Search and type are client-side filters over the board response, then mirrored into URL query parameters for shareable views.
+- Order totals use menu prices, 12% service for dine-in only, and 14% VAT on subtotal plus service. The new-order total includes the same applicable taxes.
+- `json-server` supplies IDs for newly posted orders. The next order number is determined from the existing orders immediately before submission.
+- No Arabic/English toggle, visibility-based polling pause, deployment, or end-to-end test was added; those were optional or outside the local mock API scope.
+
+## Checks
 
 ```bash
-ng build
+npm test
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## API seed data
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+The root `db.json` contains the supplied menu and seed orders. Start it with `npm run api` or directly with:
 
 ```bash
-ng test
+npx json-server@1.0.0-beta.3 db.json --port 3000
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
