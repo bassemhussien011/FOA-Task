@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -19,7 +19,7 @@ type OrderControls = { type: FormControl<OrderType>; table: FormControl<number |
   styleUrl: './new-order.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NewOrder {
+export class NewOrder implements OnInit {
   private readonly api = inject(OrdersApi);
   readonly language = inject(LanguageService);
   private readonly router = inject(Router);
@@ -44,11 +44,11 @@ export class NewOrder {
     return calculatePrice(draft, this.menu()).total;
   });
 
-  constructor() {
+  ngOnInit(): void {
     this.setTypeValidators('dine-in');
-    this.form.controls.type.valueChanges.pipe(takeUntilDestroyed()).subscribe((type) => this.setTypeValidators(type));
-    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.priceVersion.update((version) => version + 1));
-    this.api.loadMenu().pipe(takeUntilDestroyed()).subscribe({
+    this.form.controls.type.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((type) => this.setTypeValidators(type));
+    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.priceVersion.update((version) => version + 1));
+    this.api.loadMenu().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (menu) => { this.menu.set(menu); this.loading.set(false); },
       error: () => { this.menuError.set(true); this.loading.set(false); },
     });

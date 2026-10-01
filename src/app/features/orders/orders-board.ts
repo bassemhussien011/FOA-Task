@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -24,7 +24,7 @@ function isOrderType(value: string | null): value is OrderType {
   styleUrl: './orders-board.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OrdersBoard {
+export class OrdersBoard implements OnInit {
   private readonly api = inject(OrdersApi);
   readonly language = inject(LanguageService);
   private readonly route = inject(ActivatedRoute);
@@ -43,8 +43,8 @@ export class OrdersBoard {
   readonly loading = signal(true);
   readonly error = signal('');
 
-  constructor() {
-    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+  ngOnInit(): void {
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.search.set(params.get('q') ?? '');
       this.searchDraft.set(params.get('q') ?? '');
       const type = params.get('type');
@@ -57,7 +57,7 @@ export class OrdersBoard {
         this.search.set(query);
         void this.router.navigate([], { relativeTo: this.route, queryParams: { q: query || null }, queryParamsHandling: 'merge', replaceUrl: true });
       }),
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe();
     fromEvent(this.document, 'visibilitychange').pipe(
       startWith(null),
